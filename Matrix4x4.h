@@ -34,6 +34,30 @@ public:
 		m_mat[2][2] = scale.m_z;
 	}
 
+	void setRotationX(float x)
+	{
+		m_mat[1][1] = (float)cos(x);
+		m_mat[1][2] = (float)sin(x);
+		m_mat[2][1] = (float)-sin(x);
+		m_mat[2][2] = (float)cos(x);
+	}
+
+	void setRotationY(float y)
+	{
+		m_mat[0][0] = (float)cos(y);
+		m_mat[0][2] = (float)-sin(y);
+		m_mat[2][0] = (float)sin(y);
+		m_mat[2][2] = (float)cos(y);
+	}
+
+	void setRotationZ(float z)
+	{
+		m_mat[0][0] = (float)cos(z);
+		m_mat[0][1] = (float)sin(z);
+		m_mat[1][0] = (float)-sin(z);
+		m_mat[1][1] = (float)cos(z);
+	}
+
 	void setOrtohoLH(float width, float height, float near_plane, float far_plane)
 	{
 		setIdentity();
