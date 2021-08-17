@@ -16,6 +16,16 @@ public:
 	{
 	}
 
+	static Vector3D lerp(const Vector3D& start, const Vector3D& end, float delta)
+	{
+		Vector3D v;
+		v.m_x = start.m_x * (1.0f - delta) + end.m_x * (delta);
+		v.m_y = start.m_y * (1.0f - delta) + end.m_y * (delta);
+		v.m_z = start.m_z * (1.0f - delta) + end.m_z * (delta);
+
+		return v;
+	}
+
 	~Vector3D()
 	{
 
