@@ -31,14 +31,14 @@
     <Filter Include="GameEngine\GraphicsEngine\ConstantBuffer">
       <UniqueIdentifier>{82d10ccc-daef-4857-ad79-e28e94b85f27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameEngine\GraphicsEngine\Math">
-      <UniqueIdentifier>{e8931b24-fd44-405d-8c07-cdbbbfb29b97}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameEngine\GraphicsEngine\IndexBuffer">
       <UniqueIdentifier>{edaa7283-decc-4468-bd36-2d1fc73b22b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameEngine\InputSystem">
       <UniqueIdentifier>{be976733-97d6-4ca1-99df-a98516883a39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\Math">
+      <UniqueIdentifier>{e8931b24-fd44-405d-8c07-cdbbbfb29b97}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -78,7 +78,6 @@
     <ClCompile Include="InputSystem.cpp">
       <Filter>GameEngine\InputSystem</Filter>
     </ClCompile>
-    <ClCompile Include="InputListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppWindow.h">
@@ -109,10 +108,10 @@
       <Filter>GameEngine\GraphicsEngine\ConstantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="Vector3D.h">
-      <Filter>GameEngine\GraphicsEngine\Math</Filter>
+      <Filter>GameEngine\Math</Filter>
     </ClInclude>
     <ClInclude Include="Matrix4x4.h">
-      <Filter>GameEngine\GraphicsEngine\Math</Filter>
+      <Filter>GameEngine\Math</Filter>
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>GameEngine\GraphicsEngine\IndexBuffer</Filter>
@@ -122,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="InputListener.h">
       <Filter>GameEngine\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>GameEngine\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
