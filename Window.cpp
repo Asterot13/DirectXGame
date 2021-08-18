@@ -13,7 +13,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_CREATE:
 	{
 		// Event fired when the window will be created
-		Window* window = (Window*)((LPCREATESTRUCT)lparam)->lpCreateParams;
+		Window* window = (Window*) ((LPCREATESTRUCT)lparam)->lpCreateParams;
 		//SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
 		window->setHWND(hwnd);
@@ -21,10 +21,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		break;
 	}
 
+	case WM_SETFOCUS:
+	{
+		// Event fired when the window get focus
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		window->onFocus();
+		break;
+	}
+
+	case WM_KILLFOCUS:
+	{
+		// Event fired when the window lost focus
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		window->onKillFocus();
+		break;
+	}
+
 	case WM_DESTROY:
 	{
 		// Event fired when the window will be destroyed
-		Window* window = (Window*)GetWindowLong(hwnd, GWLP_USERDATA);
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 		window->onDestroy();
 		::PostQuitMessage(0);
 		break;
@@ -85,9 +101,7 @@ bool Window::Broadcast()
 		DispatchMessage(&msg);
 	}
 
-	//window->onUpdate();
-
-	Sleep(0);
+	Sleep(1);
 
 	return true;
 }
@@ -129,6 +143,14 @@ void Window::onUpdate()
 void Window::onDestroy()
 {
 	m_isRun = false;
+}
+
+void Window::onFocus()
+{
+}
+
+void Window::onKillFocus()
+{
 }
 
 Window::~Window()
