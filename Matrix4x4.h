@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Vector3D.h"
+#include "Vector4D.h"
 
 class Matrix4x4
 {
@@ -20,7 +21,6 @@ public:
 
 	void setTranslation(const Vector3D translation)
 	{
-		setIdentity();
 		m_mat[3][0] = translation.m_x;
 		m_mat[3][1] = translation.m_y;
 		m_mat[3][2] = translation.m_z;
@@ -28,7 +28,6 @@ public:
 
 	void setScale(const Vector3D scale)
 	{
-		setIdentity();
 		m_mat[0][0] = scale.m_x;
 		m_mat[1][1] = scale.m_y;
 		m_mat[2][2] = scale.m_z;
@@ -56,6 +55,92 @@ public:
 		m_mat[0][1] = (float)sin(z);
 		m_mat[1][0] = (float)-sin(z);
 		m_mat[1][1] = (float)cos(z);
+	}
+
+	float getDeterminant()
+	{
+		Vector4D minor, v1, v2, v3;
+		float det;
+
+		v1 = Vector4D(this->m_mat[0][0], this->m_mat[1][0], this->m_mat[2][0], this->m_mat[3][0]);
+		v2 = Vector4D(this->m_mat[0][1], this->m_mat[1][1], this->m_mat[2][1], this->m_mat[3][1]);
+		v3 = Vector4D(this->m_mat[0][2], this->m_mat[1][2], this->m_mat[2][2], this->m_mat[3][2]);
+
+
+		minor.cross(v1, v2, v3);
+		det = -(this->m_mat[0][3] * minor.m_x + this->m_mat[1][3] * minor.m_y + this->m_mat[2][3] * minor.m_z +
+			this->m_mat[3][3] * minor.m_w);
+		return det;
+	}
+
+	void inverse()
+	{
+		int a, i, j;
+		Matrix4x4 out;
+		Vector4D v, vec[3];
+		float det = 0.0f;
+
+		det = this->getDeterminant();
+		if (!det) return;
+		for (i = 0; i < 4; i++)
+		{
+			for (j = 0; j < 4; j++)
+			{
+				if (j != i)
+				{
+					a = j;
+					if (j > i) a = a - 1;
+					vec[a].m_x = (this->m_mat[j][0]);
+					vec[a].m_y = (this->m_mat[j][1]);
+					vec[a].m_z = (this->m_mat[j][2]);
+					vec[a].m_w = (this->m_mat[j][3]);
+				}
+			}
+			v.cross(vec[0], vec[1], vec[2]);
+
+			out.m_mat[0][i] = (float)pow(-1.0f, i) * v.m_x / det;
+			out.m_mat[1][i] = (float)pow(-1.0f, i) * v.m_y / det;
+			out.m_mat[2][i] = (float)pow(-1.0f, i) * v.m_z / det;
+			out.m_mat[3][i] = (float)pow(-1.0f, i) * v.m_w / det;
+		}
+
+		this->setMatrix(out);
+	}
+
+	void setMatrix(const Matrix4x4& matrix)
+	{
+		::memcpy(m_mat, matrix.m_mat, sizeof(float) * 16);
+	}
+
+	Vector3D getZDirection()
+	{
+		return Vector3D(m_mat[2][0], m_mat[2][1], m_mat[2][2]);
+	}
+
+	Vector3D getXDirection()
+	{
+		return Vector3D(m_mat[0][0], m_mat[0][1], m_mat[0][2]);
+	}
+
+	Vector3D getYDirection()
+	{
+		return Vector3D(m_mat[1][0], m_mat[1][1], m_mat[1][2]);
+	}
+
+	Vector3D getTranslation()
+	{
+		return Vector3D(m_mat[3][0], m_mat[3][1], m_mat[3][2]);
+	}
+
+	void setPerspectiveFovLH(float fov, float aspect, float znear, float zfar)
+	{
+		float yscale = (float)1.0f / tan(fov / 2.0f);
+		float xscale = (float)yscale / aspect;
+		m_mat[0][0] = xscale;
+		m_mat[1][1] = yscale;
+		m_mat[2][2] = zfar / (zfar - znear);
+		m_mat[2][3] = 1.0;
+		m_mat[3][2] = (-znear*zfar)/(zfar - znear);
 	}
 
 	void setOrtohoLH(float width, float height, float near_plane, float far_plane)
