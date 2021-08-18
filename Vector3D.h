@@ -26,6 +26,16 @@ public:
 		return v;
 	}
 
+	Vector3D operator* (float num)
+	{
+		return Vector3D(m_x * num, m_y * num, m_z * num);
+	}
+
+	Vector3D operator+ (Vector3D vector)
+	{
+		return Vector3D(m_x + vector.m_x, m_y + vector.m_y, m_z + vector.m_z);
+	}
+
 	~Vector3D()
 	{
 
