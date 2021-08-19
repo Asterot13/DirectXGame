@@ -1,36 +1,27 @@
 #pragma once
 #include <d3d11.h>
+#include "Prerequisites.h"
 
-class SwapChain;
-class DeviceContext;
-class VertexBuffer;
-class IndexBuffer;
-class ConstantBuffer;
-class VertexShader;
-class PixelShader;
 
 class RenderSystem
 {
 public:
 
-	RenderSystem();
 	// Initialize the graphics engine and DirectX11 Device
-	bool Init();
+	RenderSystem();
 
 	// Release all the resources loaded
-	bool Release();
-
 	~RenderSystem();
 
 public:
 
-	SwapChain* createSwapChain(HWND hwnd, UINT width, UINT height);
-	DeviceContext* getImmidiateDeviceContext();
-	VertexBuffer* createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, size_t size_byte_shader);
-	IndexBuffer* createIndexBuffer(void* list_indices, UINT size_list);
-	ConstantBuffer* createConstantBuffer(void* buffer, UINT size_buffer);
-	VertexShader* createVertexShader(const void* shader_byte_code, size_t byte_code_size);
-	PixelShader* createPixelShader(const void* shader_byte_code, size_t byte_code_size);
+	SwapChainPtr createSwapChain(HWND hwnd, UINT width, UINT height);
+	DeviceContextPtr getImmidiateDeviceContext();
+	VertexBufferPtr createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, size_t size_byte_shader);
+	IndexBufferPtr createIndexBuffer(void* list_indices, UINT size_list);
+	ConstantBufferPtr createConstantBuffer(void* buffer, UINT size_buffer);
+	VertexShaderPtr createVertexShader(const void* shader_byte_code, size_t byte_code_size);
+	PixelShaderPtr createPixelShader(const void* shader_byte_code, size_t byte_code_size);
 
 public:
 	// Vertex shader
@@ -41,7 +32,7 @@ public:
 
 private:
 
-	DeviceContext* m_imm_device_context;
+	DeviceContextPtr m_imm_device_context;
 
 private:
 
