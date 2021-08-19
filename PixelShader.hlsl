@@ -1,8 +1,7 @@
 struct PS_INPUT
 {
 	float4 pos : SV_POSITION;
-	float3 color : COLOR;
-	float3 color1 : COLOR1;
+	float2 texcoord : TEXCOORD0;
 };
 
 cbuffer constant: register(b0)
