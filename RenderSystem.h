@@ -64,4 +64,5 @@ private:
 	friend class IndexBuffer;
 	friend class VertexShader;
 	friend class PixelShader;
+	friend class Texture;
 };
