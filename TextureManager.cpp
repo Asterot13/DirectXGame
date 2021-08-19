@@ -24,5 +24,5 @@ Resource* TextureManager::createResourceFromFileConcrete(const wchar_t* file_pat
 	}
 	catch (...) {}
 
-	return nullptr;
+	return tex;
 }
