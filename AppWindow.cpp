@@ -4,6 +4,7 @@
 #include "Vector3D.h"
 #include "Matrix4x4.h"
 #include "InputSystem.h"
+#include "Mesh.h"
 
 struct vertex
 {
@@ -17,7 +18,8 @@ struct constant
 	Matrix4x4 m_world;
 	Matrix4x4 m_view;
 	Matrix4x4 m_proj;
-	unsigned int m_time;
+	Vector4D m_light_direction;
+	Vector4D m_camera_position;
 };
 
 AppWindow::AppWindow()
@@ -27,7 +29,6 @@ AppWindow::AppWindow()
 void AppWindow::update()
 {
 	constant cc;
-	cc.m_time = (int)::GetTickCount64();
 
 	m_delta_pos += m_delta_time / 10.0f;
 
@@ -37,6 +38,13 @@ void AppWindow::update()
 	m_delta_scale += m_delta_time / 0.55f;
 
 	Matrix4x4 temp;
+	Matrix4x4 m_light_rot_matrix;
+	m_light_rot_matrix.setIdentity();
+	m_light_rot_matrix.setRotationY(m_lightrot_y);
+
+	m_lightrot_y += 0.785f * m_delta_time;
+
+	cc.m_light_direction = m_light_rot_matrix.getZDirection();
 
 	/*cc.m_world.setScale(Vector3D(m_scale_cube, m_scale_cube, m_scale_cube));
 
@@ -65,10 +73,12 @@ void AppWindow::update()
 	temp.setRotationY(m_rot_y);
 	world_cam *= temp;
 
-	Vector3D new_pos = m_world_cam.getTranslation() + world_cam.getZDirection() * (m_forward*0.3f);
-	new_pos = new_pos + world_cam.getXDirection() * (m_rightward * 0.3f);
+	Vector3D new_pos = m_world_cam.getTranslation() + world_cam.getZDirection() * (m_forward*0.01f);
+	new_pos = new_pos + world_cam.getXDirection() * (m_rightward * 0.01f);
 
 	world_cam.setTranslation(new_pos);
+
+	cc.m_camera_position = new_pos;
 
 	m_world_cam = world_cam;
 
@@ -101,12 +111,13 @@ void AppWindow::onCreate()
 	InputSystem::get()->addListener(this);
 	InputSystem::get()->showCursor(false);
 
-	m_wood_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wood.jpg");
+	m_wood_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\statue.obj"); ////Pipe_16.fbx teapot.obj
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
-	m_world_cam.setTranslation(Vector3D(0, 0, -2));
+	m_world_cam.setTranslation(Vector3D(0, 0, -1));
 
 	Vector3D position_list[] =
 	{
@@ -202,7 +213,6 @@ void AppWindow::onCreate()
 	
 	m_vs = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shader_byte_code, size_shader);
 	m_vb = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(vertex_list, sizeof(vertex), size_list, shader_byte_code, size_shader);
-
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
@@ -210,7 +220,6 @@ void AppWindow::onCreate()
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	constant cc;
-	cc.m_time = 0;
 
 	m_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
 }
@@ -236,11 +245,11 @@ void AppWindow::onUpdate()
 
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setTexture(m_ps, m_wood_tex);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexBuffer(m_vb);
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexBuffer(m_mesh->getVertexBuffer());
 
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setIndexBuffer(m_ib);
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setIndexBuffer(m_mesh->getIndexBuffer());
 
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->drawIndexedTriangleList(m_ib->getSizeIndexList(), 0, 0);
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->drawIndexedTriangleList(m_mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
 	
 	m_swap_chain->present(true);
 
@@ -304,7 +313,7 @@ void AppWindow::onMouseMove(const Point& mouse_pos)
 	m_rot_x += (mouse_pos.m_y - (height / 2.0f)) * m_delta_time * 0.1f;
 	m_rot_y += (mouse_pos.m_x - (width / 2.0f)) * m_delta_time * 0.1f;
 
-	InputSystem::get()->setCursorPosition(Point((float)width / 2.0f, (float)height / 2.0f));
+	InputSystem::get()->setCursorPosition(Point((int)width / 2.0f, (int)height / 2.0f));
 }
 
 void AppWindow::onLeftMouseDown(const Point& mouse_pos)
