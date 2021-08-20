@@ -1,12 +1,12 @@
 #pragma once
 #include "ResourceManager.h"
 
-class TextureManager : public ResourceManager
+class MeshManager : public ResourceManager
 {
 public:
-	TextureManager();
-	~TextureManager();
-	TexturePtr createTextureFromFile(const wchar_t* file_path);
+	MeshManager();
+	~MeshManager();
+	MeshPtr createMeshFromFile(const wchar_t* file_path);
 
 protected:
 	// Inherited via ResourceManager

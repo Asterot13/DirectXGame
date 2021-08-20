@@ -100,7 +100,7 @@ bool Window::Broadcast()
 		DispatchMessage(&msg);
 	}
 
-	Sleep(1);
+	Sleep(0);
 
 	return true;
 }
