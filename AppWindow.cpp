@@ -28,41 +28,14 @@ AppWindow::AppWindow()
 
 void AppWindow::update()
 {
-	constant cc;
+	updateCamera();
+	updateModel();
+	updateSkybox();
+}
 
-	m_delta_pos += m_delta_time / 10.0f;
-
-	if (m_delta_pos > 1.0f)
-		m_delta_pos = 0;
-
-	m_delta_scale += m_delta_time / 0.55f;
-
-	Matrix4x4 temp;
-	Matrix4x4 m_light_rot_matrix;
-	m_light_rot_matrix.setIdentity();
-	m_light_rot_matrix.setRotationY(m_lightrot_y);
-
-	m_lightrot_y += 0.785f * m_delta_time;
-
-	cc.m_light_direction = m_light_rot_matrix.getZDirection();
-
-	/*cc.m_world.setScale(Vector3D(m_scale_cube, m_scale_cube, m_scale_cube));
-
-	temp.setIdentity();
-	temp.setRotationZ(0.0f);
-	cc.m_world *= temp;
-
-	temp.setIdentity();
-	temp.setRotationY(m_rot_y);
-	cc.m_world *= temp;
-
-	temp.setIdentity();
-	temp.setRotationX(m_rot_x);
-	cc.m_world *= temp;*/
-
-	cc.m_world.setIdentity();
-
-	Matrix4x4 world_cam;
+void AppWindow::updateCamera()
+{
+	Matrix4x4 world_cam, temp;
 	world_cam.setIdentity();
 
 	temp.setIdentity();
@@ -73,31 +46,72 @@ void AppWindow::update()
 	temp.setRotationY(m_rot_y);
 	world_cam *= temp;
 
-	Vector3D new_pos = m_world_cam.getTranslation() + world_cam.getZDirection() * (m_forward*0.01f);
-	new_pos = new_pos + world_cam.getXDirection() * (m_rightward * 0.01f);
+	Vector3D new_pos = m_world_cam.getTranslation() + world_cam.getZDirection() * (m_forward * 0.05f);
+	new_pos = new_pos + world_cam.getXDirection() * (m_rightward * 0.05f);
 
 	world_cam.setTranslation(new_pos);
-
-	cc.m_camera_position = new_pos;
 
 	m_world_cam = world_cam;
 
 	world_cam.inverse();
 
-	cc.m_view = world_cam;
-	/*cc.m_proj.setOrtohoLH(
-		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
-		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
-		-4.0f,
-		4.0f
-	);*/
+	m_view_cam = world_cam;
 
 	int width = (this->getClientWindowRect().right - this->getClientWindowRect().left);
 	int height = (this->getClientWindowRect().bottom - this->getClientWindowRect().top);
 
-	cc.m_proj.setPerspectiveFovLH(1.57f, ((float)width / (float)height), 0.1f, 100.0f);
+	m_proj_cam.setPerspectiveFovLH(1.57f, ((float)width / (float)height), 0.1f, 100.0f);
+}
+
+void AppWindow::updateModel()
+{
+	constant cc;
+
+	Matrix4x4 m_light_rot_matrix;
+	m_light_rot_matrix.setIdentity();
+	m_light_rot_matrix.setRotationY(m_lightrot_y);
+
+	m_lightrot_y += 0.785f * m_delta_time;
+
+	cc.m_world.setIdentity();
+	cc.m_view = m_view_cam;
+	cc.m_proj = m_proj_cam;
+	cc.m_camera_position = m_world_cam.getTranslation();
+	cc.m_light_direction = m_light_rot_matrix.getZDirection();
 
 	m_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
+}
+
+void AppWindow::updateSkybox()
+{
+	constant cc;
+
+	cc.m_world.setIdentity();
+	cc.m_world.setScale(Vector3D(100.0f, 100.0f, 100.0f));
+	cc.m_world.setTranslation(m_world_cam.getTranslation());
+	cc.m_view = m_view_cam;
+	cc.m_proj = m_proj_cam;
+
+	m_sky_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
+}
+
+void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vs, const PixelShaderPtr& ps, const ConstantBufferPtr& cb, const TexturePtr& tex)
+{
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(vs, cb);
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(ps, cb);
+
+	// Set default shaders in the graphics pipeline to be able to draw
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexShader(vs);
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setPixelShader(ps);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setTexture(ps, tex);
+
+	// Set the vertices of triangle to draw
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
+	// Set the indices of the triangle to draw
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
+
+	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->drawIndexedTriangleList(mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
 }
 
 AppWindow::~AppWindow()
@@ -112,7 +126,10 @@ void AppWindow::onCreate()
 	InputSystem::get()->showCursor(false);
 
 	m_wood_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\statue.obj"); ////Pipe_16.fbx teapot.obj
+	m_sky_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sky.jpg");
+
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\suzanne.obj"); //Pipe_16.fbx teapot.obj
+	m_skymesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj"); //Pipe_16.fbx teapot.obj
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
@@ -219,9 +236,14 @@ void AppWindow::onCreate()
 	m_ps = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"SkyBoxShader.hlsl", "psmain", &shader_byte_code, &size_shader);
+	m_sky_ps = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
+	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+
 	constant cc;
 
 	m_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
+	m_sky_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
 }
 
 void AppWindow::onUpdate()
@@ -235,21 +257,16 @@ void AppWindow::onUpdate()
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 
+	// Compute transform matrices
 	update();
 
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(m_vs, m_cb);
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(m_ps, m_cb);
+	// Render model
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	drawMesh(m_mesh, m_vs, m_ps, m_cb, m_wood_tex);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexShader(m_vs);
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setPixelShader(m_ps);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setTexture(m_ps, m_wood_tex);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexBuffer(m_mesh->getVertexBuffer());
-
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setIndexBuffer(m_mesh->getIndexBuffer());
-
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->drawIndexedTriangleList(m_mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
+	// Render skybox / skysphere
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
+	drawMesh(m_skymesh, m_vs, m_sky_ps, m_sky_cb, m_sky_tex);
 	
 	m_swap_chain->present(true);
 
