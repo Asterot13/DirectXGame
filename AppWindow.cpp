@@ -20,6 +20,8 @@ struct constant
 	Matrix4x4 m_proj;
 	Vector4D m_light_direction;
 	Vector4D m_camera_position;
+	Vector4D m_light_position = Vector4D(0,1,0,0);
+	float m_light_radius = 2.0f;
 	float m_time = 0.0f;
 };
 
@@ -117,6 +119,9 @@ void AppWindow::updateModel()
 	cc.m_light_direction = m_light_rot_matrix.getZDirection();
 	cc.m_time = m_time;
 
+	float dist_from_origin = 1.0f;
+	cc.m_light_position = Vector4D(cos(m_lightrot_y)*dist_from_origin, 1.0f, sin(m_lightrot_y) * dist_from_origin, 1.0f);
+
 	m_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
 }
 
@@ -171,7 +176,7 @@ void AppWindow::onCreate()
 
 	m_sky_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj"); //Pipe_16.fbx teapot.obj
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\scene.obj"); //Pipe_16.fbx teapot.obj
 	m_skymesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj"); //Pipe_16.fbx teapot.obj
 
 	RECT rc = this->getClientWindowRect();
@@ -269,13 +274,13 @@ void AppWindow::onCreate()
 
 	void* shader_byte_code = nullptr;
 	size_t size_shader = 0;
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"VertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightVertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
 	
 	m_vs = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shader_byte_code, size_shader);
 	m_vb = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(vertex_list, sizeof(vertex), size_list, shader_byte_code, size_shader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightPixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
 	m_ps = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
