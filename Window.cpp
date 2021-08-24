@@ -14,6 +14,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		break;
 	}
 
+	case WM_SIZE:
+	{
+		// Event fired when the window will be resized
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		if (window)
+			window->onSize();
+		break;
+	}
+
 	case WM_SETFOCUS:
 	{
 		// Event fired when the window get focus
@@ -70,7 +79,7 @@ Window::Window()
 	/*if (!window)
 		window = this;*/
 
-	m_hwnd = ::CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, L"MyWindowClass", L"DirectX Application", WS_CAPTION | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, NULL, NULL);
+	m_hwnd = ::CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, L"MyWindowClass", L"DirectX Application", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, NULL, NULL);
 
 	if (!m_hwnd) // if the creation failed, return false
 		throw std::exception("Window not created successfully");
@@ -119,6 +128,16 @@ RECT Window::getClientWindowRect()
 	return rc;
 }
 
+RECT Window::getScreenSize()
+{
+	RECT rc;
+
+	rc.right = ::GetSystemMetrics(SM_CXSCREEN);
+	rc.bottom = ::GetSystemMetrics(SM_CYSCREEN);
+
+	return rc;
+}
+
 void Window::onCreate()
 {
 }
@@ -138,6 +157,11 @@ void Window::onFocus()
 
 void Window::onKillFocus()
 {
+}
+
+void Window::onSize()
+{
+
 }
 
 Window::~Window()
