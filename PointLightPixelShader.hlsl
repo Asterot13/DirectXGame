@@ -23,7 +23,7 @@ cbuffer constant: register(b0)
 
 float4 psmain(PS_INPUT input) : SV_TARGET
 {
-	float4 tex_color = float4(1,1,1,1); //TextureColor.Sample(TextureColorSampler, 1.0 - input.texcoord);
+	float4 tex_color = TextureColor.Sample(TextureColorSampler, (1.0 - input.texcoord) * 2.0);
 
 	// AMBIENT LIGHT
 	float ka = 1.5f;
@@ -47,6 +47,7 @@ float4 psmain(PS_INPUT input) : SV_TARGET
 
 	float amount_diffuse_light = max(0, dot(light_dir.xyz, input.normal));
 	float3 id = float3(1,1,1);
+	id *= (tex_color.rgb);
 	float3 diffuse_light = (kd * id * amount_diffuse_light)/ attenuation;
 
 	// SPECULAR LIGHT
