@@ -54,6 +54,7 @@ private:
 	ConstantBufferPtr m_sky_cb;
 	IndexBufferPtr m_ib;
 
+	TexturePtr m_wall_tex;
 	TexturePtr m_earth_color_tex;
 	TexturePtr m_earth_spec_tex;
 	TexturePtr m_clouds_tex;
@@ -86,6 +87,7 @@ private:
 	Matrix4x4 m_proj_cam;
 
 	float m_time = 0.0f;
+	float m_light_radius = 4.0f;
 
 	bool m_play_state = false;
 	bool m_fullscreen_state = false;

@@ -21,7 +21,7 @@ struct constant
 	Vector4D m_light_direction;
 	Vector4D m_camera_position;
 	Vector4D m_light_position = Vector4D(0,1,0,0);
-	float m_light_radius = 2.0f;
+	float m_light_radius = 4.0f;
 	float m_time = 0.0f;
 };
 
@@ -42,13 +42,10 @@ void AppWindow::render()
 	// Render model
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
 
-	TexturePtr list_tex[4];
-	list_tex[0] = m_earth_color_tex;
-	list_tex[1] = m_earth_spec_tex;
-	list_tex[2] = m_clouds_tex;
-	list_tex[3] = m_earth_night_tex;
+	TexturePtr list_tex[1];
+	list_tex[0] = m_wall_tex;
 
-	drawMesh(m_mesh, m_vs, m_ps, m_cb, list_tex, 4);
+	drawMesh(m_mesh, m_vs, m_ps, m_cb, list_tex, 1);
 
 	// Render skybox / skysphere
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
@@ -110,7 +107,7 @@ void AppWindow::updateModel()
 	m_light_rot_matrix.setIdentity();
 	m_light_rot_matrix.setRotationY(m_lightrot_y);
 
-	m_lightrot_y += 0.185f * m_delta_time;
+	m_lightrot_y += 1.57f * m_delta_time;
 
 	cc.m_world.setIdentity();
 	cc.m_view = m_view_cam;
@@ -118,6 +115,7 @@ void AppWindow::updateModel()
 	cc.m_camera_position = m_world_cam.getTranslation();
 	cc.m_light_direction = m_light_rot_matrix.getZDirection();
 	cc.m_time = m_time;
+	cc.m_light_radius = m_light_radius;
 
 	float dist_from_origin = 1.0f;
 	cc.m_light_position = Vector4D(cos(m_lightrot_y)*dist_from_origin, 1.0f, sin(m_lightrot_y) * dist_from_origin, 1.0f);
@@ -169,10 +167,7 @@ void AppWindow::onCreate()
 	m_play_state = true;
 	InputSystem::get()->showCursor(false);
 
-	m_earth_color_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
-	m_earth_spec_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_spec.jpg");
-	m_clouds_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\clouds.jpg");
-	m_earth_night_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_night.jpg");
+	m_wall_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
 
 	m_sky_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
@@ -349,6 +344,16 @@ void AppWindow::onKeyDown(int key)
 	{
 		//m_rot_y -= 3.14f * m_delta_time;
 		m_rightward = 1.0f;
+	}
+
+	if (key == 'O')
+	{
+		m_light_radius -= 1.0f * m_delta_time;
+	}
+	else if (key == 'P')
+	{
+		//m_rot_y -= 3.14f * m_delta_time;
+		m_light_radius += 1.0f * m_delta_time;
 	}
 }
 
