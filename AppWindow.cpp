@@ -39,19 +39,26 @@ void AppWindow::render()
 	// Compute transform matrices
 	update();
 
-	// Render model
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	for (int i = 0; i < 3; i++)
+	{
+		// Render model
+		updateModel(Vector3D(0, 2.0f, -4.0f + 4.0f * i), m_mat);
+		drawMesh(m_torus_mesh, m_mat);
 
-	TexturePtr list_tex[1];
-	list_tex[0] = m_wall_tex;
+		// Render model
+		updateModel(Vector3D(4.0f, 2, -4.0f + 4.0f * i), m_earth_mat);
+		drawMesh(m_skymesh, m_earth_mat);
 
-	drawMesh(m_mesh, m_vs, m_ps, m_cb, list_tex, 1);
+		// Render model
+		updateModel(Vector3D(-4.0f, 2.0f, -4.0f + 4.0f * i), m_bricks_mat);
+		drawMesh(m_suzanne_mesh, m_bricks_mat);
+	}
+
+	updateModel(Vector3D(0, 0, 0), m_mat);
+	drawMesh(m_plane_mesh, m_mat);
 
 	// Render skybox / skysphere
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
-
-	list_tex[0] = m_sky_tex;
-	drawMesh(m_skymesh, m_vs, m_sky_ps, m_sky_cb, list_tex, 1);
+	drawMesh(m_skymesh, m_skymat);
 
 	m_swap_chain->present(true);
 
@@ -65,7 +72,7 @@ void AppWindow::render()
 void AppWindow::update()
 {
 	updateCamera();
-	updateModel();
+	updateLight();
 	updateSkybox();
 }
 
@@ -99,7 +106,7 @@ void AppWindow::updateCamera()
 	m_proj_cam.setPerspectiveFovLH(1.57f, ((float)width / (float)height), 0.1f, 100.0f);
 }
 
-void AppWindow::updateModel()
+void AppWindow::updateModel(Vector3D position, const MaterialPtr& material)
 {
 	constant cc;
 
@@ -107,20 +114,22 @@ void AppWindow::updateModel()
 	m_light_rot_matrix.setIdentity();
 	m_light_rot_matrix.setRotationY(m_lightrot_y);
 
-	m_lightrot_y += 1.57f * m_delta_time;
 
 	cc.m_world.setIdentity();
+	cc.m_world.setTranslation(position);
 	cc.m_view = m_view_cam;
 	cc.m_proj = m_proj_cam;
 	cc.m_camera_position = m_world_cam.getTranslation();
+
+	cc.m_light_position = m_light_position;
 	cc.m_light_direction = m_light_rot_matrix.getZDirection();
 	cc.m_time = m_time;
 	cc.m_light_radius = m_light_radius;
 
-	float dist_from_origin = 1.0f;
-	cc.m_light_position = Vector4D(cos(m_lightrot_y)*dist_from_origin, 1.0f, sin(m_lightrot_y) * dist_from_origin, 1.0f);
-
-	m_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
+	m_mat->setData(&cc, sizeof(constant));
+	m_earth_mat->setData(&cc, sizeof(constant));
+	m_bricks_mat->setData(&cc, sizeof(constant));
+	//m_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
 }
 
 void AppWindow::updateSkybox()
@@ -133,19 +142,20 @@ void AppWindow::updateSkybox()
 	cc.m_view = m_view_cam;
 	cc.m_proj = m_proj_cam;
 
-	m_sky_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
+	m_skymat->setData(&cc, sizeof(constant));
+	//m_sky_cb->update(GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext(), &cc);
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vs, const PixelShaderPtr& ps, const ConstantBufferPtr& cb, const TexturePtr* list_tex, unsigned int num_textures)
+void AppWindow::updateLight()
 {
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(vs, cb);
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setConstantBuffer(ps, cb);
+	m_lightrot_y += 1.57f * m_delta_time;
+	float dist_from_origin = 3.0f;
+	m_light_position = Vector4D(cos(m_lightrot_y) * dist_from_origin, 2.0f, sin(m_lightrot_y) * dist_from_origin, 1.0f);
+}
 
-	// Set default shaders in the graphics pipeline to be able to draw
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexShader(vs);
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setPixelShader(ps);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setTexture(ps, list_tex, num_textures);
+void AppWindow::drawMesh(const MeshPtr& mesh, const MaterialPtr& material)
+{
+	GraphicsEngine::get()->setMaterial(material);
 
 	// Set the vertices of triangle to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
@@ -168,125 +178,42 @@ void AppWindow::onCreate()
 	InputSystem::get()->showCursor(false);
 
 	m_wall_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
-
+	m_bricks_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+	m_earth_color_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
+	m_earth_spec_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_spec.jpg");
+	m_clouds_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\clouds.jpg");
+	m_earth_night_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_night.jpg");
 	m_sky_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\scene.obj"); //Pipe_16.fbx teapot.obj
-	m_skymesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj"); //Pipe_16.fbx teapot.obj
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\scene.obj");
+	m_torus_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\torus.obj");
+	m_suzanne_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\suzanne.obj");
+	m_plane_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\plane.obj");
+	m_skymesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
 	m_world_cam.setTranslation(Vector3D(0, 0, -1));
 
-	Vector3D position_list[] =
-	{
-		{Vector3D(-0.5f, -0.5f, -0.5f)}, // POS1
-		{Vector3D(-0.5f, 0.5f, -0.5f)},  // POS2
-		{Vector3D(0.5f, 0.5f, -0.5f)},   // POS3
-		{Vector3D(0.5f, -0.5f, -0.5f)},	 // POS4
+	m_mat = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
+	m_mat->addTexture(m_wall_tex);
+	m_mat->setCullMode(CULL_MODE_BACK);
 
-		{Vector3D(0.5f, -0.5f, 0.5f)}, // POS5
-		{Vector3D(0.5f, 0.5f, 0.5f)},  // POS6
-		{Vector3D(-0.5f, 0.5f, 0.5f)}, // POS7
-		{Vector3D(-0.5f, -0.5f, 0.5f)} // POS8
-	};
+	m_earth_mat = GraphicsEngine::get()->createMaterial(L"VertexShader.hlsl", L"PixelShader.hlsl");
+	m_earth_mat->addTexture(m_earth_color_tex);
+	m_earth_mat->addTexture(m_earth_spec_tex);
+	m_earth_mat->addTexture(m_clouds_tex);
+	m_earth_mat->addTexture(m_earth_night_tex);
+	m_earth_mat->setCullMode(CULL_MODE_BACK);
 
-	Vector2D texcoord_list[] =
-	{
-		{Vector2D(0.0f, 0.0f)},
-		{Vector2D(0.0f, 1.0f)},
-		{Vector2D(1.0f, 0.0f)},
-		{Vector2D(1.0f, 1.0f)}
-	};
-
-	vertex vertex_list[] =
-	{
-		// FRONT FACE
-		{ position_list[0], texcoord_list[1] },
-		{ position_list[1], texcoord_list[0] },
-		{ position_list[2], texcoord_list[2] },
-		{ position_list[3], texcoord_list[3] },
-
-		// BACK FACE
-		{ position_list[4], texcoord_list[1] },
-		{ position_list[5], texcoord_list[0] },
-		{ position_list[6], texcoord_list[2] },
-		{ position_list[7], texcoord_list[3] },
-
-		//TOP SIDE
-		{ position_list[1], texcoord_list[1] },
-		{ position_list[6], texcoord_list[0] },
-		{ position_list[5], texcoord_list[2] },
-		{ position_list[2], texcoord_list[3] },
-
-		//BOTTOM SIDE
-		{ position_list[7], texcoord_list[1] },
-		{ position_list[0], texcoord_list[0] },
-		{ position_list[3], texcoord_list[2] },
-		{ position_list[4], texcoord_list[3] },
-
-		//RIGHT SIDE
-		{ position_list[3], texcoord_list[1] },
-		{ position_list[2], texcoord_list[0] },
-		{ position_list[5], texcoord_list[2] },
-		{ position_list[4], texcoord_list[3] },
-
-		//LEFT SIDE
-		{ position_list[7], texcoord_list[1] },
-		{ position_list[6], texcoord_list[0] },
-		{ position_list[1], texcoord_list[2] },
-		{ position_list[0], texcoord_list[3] }
-
-	};
-
-	UINT size_list = ARRAYSIZE(vertex_list);
-
-	unsigned int index_list[] =
-	{
-		//FRONT SIDE
-		0, 1, 2, //FIRST TRIANGLE
-		2, 3, 0, //SECOND TRIANGLE
-		//BACK SIDE
-		4, 5, 6,
-		6, 7, 4,
-		//TOP SIDE
-		8, 9, 10,
-		10, 11, 8,
-		//BOTTOM SIDE
-		12, 13, 14,
-		14, 15, 12,
-		//RIGHT SIDE
-		16, 17, 18,
-		18, 19, 16,
-		//LEFT SIDE
-		20, 21, 22,
-		22, 23, 20
-	};
-
-	UINT size_index_list = ARRAYSIZE(index_list);
-	m_ib = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(index_list, size_index_list);
-
-	void* shader_byte_code = nullptr;
-	size_t size_shader = 0;
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightVertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
+	m_bricks_mat = GraphicsEngine::get()->createMaterial(m_mat);
+	m_bricks_mat->addTexture(m_bricks_tex);
+	m_bricks_mat->setCullMode(CULL_MODE_BACK);
 	
-	m_vs = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shader_byte_code, size_shader);
-	m_vb = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(vertex_list, sizeof(vertex), size_list, shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightPixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
-	m_ps = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"SkyBoxShader.hlsl", "psmain", &shader_byte_code, &size_shader);
-	m_sky_ps = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	constant cc;
-
-	m_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
-	m_sky_cb = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
+	m_skymat = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"SkyBoxShader.hlsl");
+	m_skymat->addTexture(m_sky_tex);
+	m_skymat->setCullMode(CULL_MODE_FRONT);
 
 	m_world_cam.setTranslation(Vector3D(0, 0, -2));
 }
