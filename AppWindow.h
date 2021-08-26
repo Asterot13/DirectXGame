@@ -39,10 +39,10 @@ public:
 	void render();
 	void update();
 	void updateCamera();
-	void updateModel(Vector3D position, const MaterialPtr& material);
+	void updateModel(Vector3D position, const std::vector<MaterialPtr>& list_material);
 	void updateSkybox();
 	void updateLight();
-	void drawMesh(const MeshPtr& mesh, const MaterialPtr& material);
+	void drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_material);
 
 private:
 
@@ -62,17 +62,29 @@ private:
 	TexturePtr m_clouds_tex;
 	TexturePtr m_earth_night_tex;
 	TexturePtr m_sky_tex;
+	TexturePtr m_sand_tex;
+	TexturePtr m_barrel_tex;
+	TexturePtr m_brick_tex;
+	TexturePtr m_window_tex;
+	TexturePtr m_wood_tex;
 
 	MeshPtr m_mesh;
 	MeshPtr m_torus_mesh;
 	MeshPtr m_suzanne_mesh;
 	MeshPtr m_plane_mesh;
 	MeshPtr m_skymesh;
+	MeshPtr m_terrainmesh;
+	MeshPtr m_housemesh;
 
 	MaterialPtr m_mat;
 	MaterialPtr m_bricks_mat;
 	MaterialPtr m_earth_mat;
 	MaterialPtr m_skymat;
+	MaterialPtr m_terrainmat;
+	MaterialPtr m_barrelmat;
+	MaterialPtr m_brickmat;
+	MaterialPtr m_windowmat;
+	MaterialPtr m_woodmat;
 
 private:
 
@@ -97,10 +109,11 @@ private:
 	Matrix4x4 m_proj_cam;
 
 	float m_time = 0.0f;
-	float m_light_radius = 4.0f;
+	float m_light_radius = 500.0f;
 
 	bool m_play_state = false;
 	bool m_fullscreen_state = false;
 
+	std::vector<MaterialPtr> m_list_materials;
 	Vector4D m_light_position;
 };
