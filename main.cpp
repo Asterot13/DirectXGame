@@ -1,4 +1,5 @@
 #include "AppWindow.h"
+#include "SpaceShooterGame.h"
 #include "InputSystem.h"
 #include "GraphicsEngine.h"
 
@@ -17,7 +18,7 @@ int main()
 	{
 		try
 		{
-			AppWindow app;
+			SpaceShooterGame app;
 
 			while (app.isRun());
 		}
