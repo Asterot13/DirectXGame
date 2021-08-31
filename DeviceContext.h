@@ -9,6 +9,7 @@ public:
 	DeviceContext(ID3D11DeviceContext* device_context, RenderSystem* system);
 
 	void clearRenderTargetColor(const SwapChainPtr& swap_chain, float red, float green, float blue, float alpha);
+	void clearDepthStencil(const SwapChainPtr& swap_chain);
 
 	void setVertexBuffer(const VertexBufferPtr& vertex_buffer);
 	void setIndexBuffer(const IndexBufferPtr& index_buffer);

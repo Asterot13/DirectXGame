@@ -24,14 +24,19 @@ public:
 		return v;
 	}
 
-	Vector2D operator* (float num)
+	Vector2D operator* (float num) const
 	{
 		return Vector2D(m_x * num, m_y * num);
 	}
 
-	Vector2D operator+ (Vector2D vector)
+	Vector2D operator+ (const Vector2D vector) const
 	{
 		return Vector2D(m_x + vector.m_x, m_y + vector.m_y);
+	}
+
+	Vector2D operator- (const Vector2D vector) const
+	{
+		return Vector2D(m_x - vector.m_x, m_y - vector.m_y);
 	}
 
 	~Vector2D()

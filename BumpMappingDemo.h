@@ -11,11 +11,12 @@
 #include "InputListener.h"
 #include "Matrix4x4.h"
 
-class SpaceShooterGame : public Window, public InputListener
+
+class BumpMappingDemo : public Window, public InputListener
 {
 public:
-	SpaceShooterGame();
-	~SpaceShooterGame();
+	BumpMappingDemo();
+	~BumpMappingDemo();
 
 	// Inherited via Window
 	virtual void onCreate() override;
@@ -34,39 +35,31 @@ public:
 	virtual void onLeftMouseUp(const Point& mouse_pos) override;
 	virtual void onRightMouseDown(const Point& mouse_pos) override;
 	virtual void onRightMouseUp(const Point& mouse_pos) override;
-
 public:
 	void render();
 	void update();
-	void updateCamera();
+	void updateModel(Vector3D position, Vector3D rotation, Vector3D scale, const std::vector<MaterialPtr>& list_materials);
 	void updateThirdPersonCamera();
-	void updateModel(Vector3D position, Vector3D rotation, Vector3D scale, const std::vector<MaterialPtr>& list_material);
-	void updateSkybox();
+	void updateSkyBox();
 	void updateLight();
-	void updateSpaceShip();
-	void drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_material);
-
+	void drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_materials/* MaterialPtr* list_materials, unsigned int size_list_materials*/);
+	void updateViewportProjection();
 private:
-
 	SwapChainPtr m_swap_chain;
 
+	MeshPtr m_sphere_mesh;
+	TexturePtr m_brick_tex;
+	TexturePtr m_brick_normal_tex;
+	MaterialPtr m_brick_mat;
+
+
 	TexturePtr m_sky_tex;
-	TexturePtr m_spaceship_tex;
-	TexturePtr m_asteroid_tex;
-
-	MeshPtr m_skymesh;
-	MeshPtr m_spaceship_mesh;
-	MeshPtr m_asteroid_mesh;
-
+	MeshPtr m_sky_mesh;
+	MaterialPtr m_sky_mat;
 	MaterialPtr m_base_mat;
-	MaterialPtr m_skymat;
-	MaterialPtr m_spaceship_mat;
-	MaterialPtr m_asteroid_mat;
-
 private:
-
-	float m_old_delta;
-	float m_new_delta;
+	long m_old_delta;
+	long m_new_delta;
 	float m_delta_time;
 
 	float m_current_cam_distance;
@@ -75,32 +68,16 @@ private:
 	Vector3D m_cam_rot;
 	Vector3D m_cam_pos;
 
-	float m_spaceship_speed = 125.0f;
-	Vector3D m_current_spaceship_pos;
-	Vector3D m_spaceship_pos;
-	Vector3D m_current_spaceship_rot;
-	Vector3D m_spaceship_rot;
-
 	float m_delta_mouse_x = 0.0f, m_delta_mouse_y = 0.0f;
 
-	Vector3D m_asteroids_pos[200];
-	Vector3D m_asteroids_rot[200];
-	Vector3D m_asteroids_scale[200];
-
-	float m_forward = 0.0f;
-	float m_rightward = 0.0f;
-
-	bool m_turbo_mode = false;
 	Matrix4x4 m_world_cam;
 	Matrix4x4 m_view_cam;
 	Matrix4x4 m_proj_cam;
-	Matrix4x4 m_light_rot_matrix;
 
 	float m_time = 0.0f;
 
+	Matrix4x4 m_light_rot_matrix;
 	bool m_play_state = false;
 	bool m_fullscreen_state = false;
-
 	std::vector<MaterialPtr> m_list_materials;
-	Vector4D m_light_position;
 };

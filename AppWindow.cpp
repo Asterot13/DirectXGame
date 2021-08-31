@@ -190,7 +190,7 @@ void AppWindow::drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& li
 	// Set the indices of the triangle to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
 
-	for (size_t m = 0; m < mesh->getNumMaterialsSlots(); m++)
+	for (size_t m = 0; m < mesh->getNumMaterialSlots(); m++)
 	{
 		if (m >= list_material.size()) break;
 
