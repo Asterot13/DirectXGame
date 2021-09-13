@@ -1,7 +1,9 @@
 #include "AppWindow.h"
 #include "SpaceShooterGame.h"
 #include "BumpMappingDemo.h"
+#include "FrameBufferDemo.h"
 #include "InputSystem.h"
+#include "MiniGame.h"
 #include "GraphicsEngine.h"
 
 int main()
@@ -19,7 +21,7 @@ int main()
 	{
 		try
 		{
-			BumpMappingDemo app;
+			FrameBufferDemo app;
 
 			while (app.isRun());
 		}

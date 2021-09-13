@@ -85,6 +85,9 @@
     <Filter Include="App\GlobalShaders\DirLightBumpMapping">
       <UniqueIdentifier>{1d6b0ab3-489d-476e-866e-28575dfab781}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App\FrameBufferDemo">
+      <UniqueIdentifier>{09962a0a-6e3e-4893-8e03-728b8911600f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -152,6 +155,12 @@
     </ClCompile>
     <ClCompile Include="BumpMappingDemo.cpp">
       <Filter>App\BumpMappingDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBufferDemo.cpp">
+      <Filter>App\FrameBufferDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniGame.cpp">
+      <Filter>App\FrameBufferDemo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +253,15 @@
     </ClInclude>
     <ClInclude Include="BumpMappingDemo.h">
       <Filter>App\BumpMappingDemo</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBufferDemo.h">
+      <Filter>App\FrameBufferDemo</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>GameEngine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniGame.h">
+      <Filter>App\FrameBufferDemo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
