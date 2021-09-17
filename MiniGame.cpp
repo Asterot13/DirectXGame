@@ -33,12 +33,10 @@ MiniGame::MiniGame()
 
 void MiniGame::render()
 {
-	//GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, 0, 0.3f, 0.4f, 1);
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->clearRenderTarget(this->m_render_target, 0, 0.3f, 0.4f, 1);
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->clearDepthStencil(this->m_depth_stensil);
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setRenderTarget(this->m_render_target, this->m_depth_stensil);
 
-	//RECT rc = this->getClientWindowRect();
 	Rect Viewport_size = m_render_target->getSize();
 	GraphicsEngine::get()->getRenderSystem()->getImmidiateDeviceContext()->setViewportSize(Viewport_size.width, Viewport_size.height);
 

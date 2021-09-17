@@ -4,6 +4,7 @@
 #include "FrameBufferDemo.h"
 #include "InputSystem.h"
 #include "MiniGame.h"
+#include "PostProcessingDemo.h"
 #include "GraphicsEngine.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 	{
 		try
 		{
-			FrameBufferDemo app;
+			PostProcessingDemo app;
 
 			while (app.isRun());
 		}
